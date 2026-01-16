@@ -208,4 +208,4 @@ The [LLM application stack](https://a16z.com/emerging-architectures-for-llm-appl
 
 --
 
-Do you have any questions about how to best prepare for Session 1 after reading? Please don't hesitate to provide direct feedback to `greg@aimakerspace.io` or `Dr Greg` on Discord!
+Do you have any questions about how to best prepare for Session 2 after reading? Please don't hesitate to provide direct feedback to `greg@aimakerspace.io` or `Dr Greg` on Discord!
