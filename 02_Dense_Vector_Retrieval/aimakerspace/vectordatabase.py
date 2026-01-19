@@ -13,6 +13,11 @@ def cosine_similarity(vector_a: np.array, vector_b: np.array) -> float:
     return dot_product / (norm_a * norm_b)
 
 
+def euclidean_distance(vector_a: np.array, vector_b: np.array) -> float:
+    """Computes the euclidean distance between two vectors."""
+    return np.linalg.norm(vector_a - vector_b)
+
+
 class VectorDatabase:
     def __init__(self, embedding_model: EmbeddingModel = None):
         self.vectors = defaultdict(np.array)
@@ -26,12 +31,13 @@ class VectorDatabase:
         query_vector: np.array,
         k: int,
         distance_measure: Callable = cosine_similarity,
+        reverse: bool = True,
     ) -> List[Tuple[str, float]]:
         scores = [
             (key, distance_measure(query_vector, vector))
             for key, vector in self.vectors.items()
         ]
-        return sorted(scores, key=lambda x: x[1], reverse=True)[:k]
+        return sorted(scores, key=lambda x: x[1], reverse=reverse)[:k]
 
     def search_by_text(
         self,
@@ -39,9 +45,10 @@ class VectorDatabase:
         k: int,
         distance_measure: Callable = cosine_similarity,
         return_as_text: bool = False,
+        reverse: bool = True,
     ) -> List[Tuple[str, float]]:
         query_vector = self.embedding_model.get_embedding(query_text)
-        results = self.search(query_vector, k, distance_measure)
+        results = self.search(query_vector, k, distance_measure, reverse=reverse)
         return [result[0] for result in results] if return_as_text else results
 
     def retrieve_from_key(self, key: str) -> np.array:
@@ -78,4 +85,13 @@ if __name__ == "__main__":
     relevant_texts = vector_db.search_by_text(
         "I think fruit is awesome!", k=k, return_as_text=True
     )
-    print(f"Closest {k} text(s):", relevant_texts)
+    print(f"Closest {k} text(s) (Cosine Similarity):", relevant_texts)
+
+    relevant_texts_euclidean = vector_db.search_by_text(
+        "I think fruit is awesome!",
+        k=k,
+        distance_measure=euclidean_distance,
+        return_as_text=True,
+        reverse=False,
+    )
+    print(f"Closest {k} text(s) (Euclidean Distance):", relevant_texts_euclidean)
