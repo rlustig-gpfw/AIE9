@@ -171,6 +171,10 @@ Generated: 2024-01-26
 - [LangGraph Hierarchical Teams](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/hierarchical_agent_teams/)
 - [LangChain File System Tools](https://python.langchain.com/docs/integrations/tools/filesystem/)
 
+
+### Advanced Build Architecture Diagram
+![Alt text](data/wellness_plan_architecture_diagram.png)
+
 ### Submitting the Advanced Build
 1. Complete all steps of the Main Assignment above
 2. Include your multi-agent implementation with file I/O tools
