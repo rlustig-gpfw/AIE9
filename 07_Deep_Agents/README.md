@@ -56,6 +56,19 @@ cp .env.sample .env
 
 Run the notebook!
 
+## Activity #2
+- Built an Automated Podcast Producer deep agent that creates podcast scripts from long articles or technical documents, similar to NotebookLM
+- To support this build, I installed the `pymupdf4llm` library, which can extract text from pdf files
+- Files added: 
+    - new skill: `podcast-production` stored in skills dir
+    - new directory: `podcast_scripts` to store the final scripts
+    - example input file: `attention.pdf`
+- Generated files:
+    - `attention_summary.md`
+    - `attention_script_v1.md`
+    - `attention_final_script.md`
+    - `podcast_scripts/attention_is_all_you_need.md`
+
 # Ship
 
 - Customize your Deep Agent with one of the following enhancements:
