@@ -39,7 +39,7 @@ And this is what the Certification challenge is all about - putting **your skill
 During Cohort 8, here is how the numbers shook out. It took an average of 26.2 hours for people to complete the challenge. This is up slightly from 23.2 hours on average in Cohort 7.
 
 <p align="center">
-  <img src="ccChart.jpg" width="80%" />
+  <img src="ccChart.webp" width="80%" />
 </p>
 
 It’s very much worth considering that the kind of AI Engineering work we’re doing; that is, scoping a problem, creating a solution to that problem that solves a specific pain point for real customers or stakeholders, and engineering it for scale from day 1, is extremely valuable work.
