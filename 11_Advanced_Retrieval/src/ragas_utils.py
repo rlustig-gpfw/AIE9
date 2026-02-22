@@ -18,10 +18,13 @@ from ragas.metrics import (
 )
 from ragas.llms import LangchainLLMWrapper
 
+
 evaluator_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4.1-mini"))
 
-
 def run_ragas_evaluation(retriever_chain: Runnable, chain_name: str, dataset: Testset):
+    """
+    Run Ragas evaluation for a given retriever chain and return the results.
+    """
     metrics = [
         LLMContextRecall(),
         ContextPrecision(),
@@ -62,7 +65,7 @@ def run_ragas_evaluation(retriever_chain: Runnable, chain_name: str, dataset: Te
             "completion_tokens": completion_tokens,
             "total_tokens": total_tokens,
         })
-        time.sleep(5)
+        time.sleep(5)  # Sleep to avoid rate limiting
 
     eval_df = pd.DataFrame(rows)
     evaluation_dataset = EvaluationDataset.from_pandas(eval_df)
@@ -101,7 +104,6 @@ def _filter_result_metrics(result: EvaluationResult, keep_metrics: Iterable):
 def compare_ragas_results(all_evaluation_results: List[Dict[str, EvaluationResult]]):
     """ 
     Compare RAGAS results for different retriever chains and return a table.
-
     """
     keep_metrics = [
         "context_recall",
@@ -120,7 +122,3 @@ def compare_ragas_results(all_evaluation_results: List[Dict[str, EvaluationResul
     df = pd.DataFrame.from_dict(rows, orient="index")
     
     return df.round(3)
-
-
-# def process_ragas_results(eval_results: EvaluationResult, chain_name: str):
-#     """ Process the Ragas results for a given chain and 
