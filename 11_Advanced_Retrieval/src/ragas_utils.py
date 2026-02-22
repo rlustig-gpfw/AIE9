@@ -2,8 +2,9 @@
 # - running ragas evaluation
 # - processing ragas results
 
+import time
 from langchain_openai import ChatOpenAI
-from typing import Dict, Iterable
+from typing import Dict, Iterable, List
 import pandas as pd
 from langchain_core.runnables import Runnable
 from ragas.dataset_schema import EvaluationResult
@@ -11,7 +12,7 @@ from ragas.testset import Testset
 from ragas import evaluate, EvaluationDataset
 from ragas.metrics import (
     LLMContextRecall,
-    FactualCorrectness,
+    ContextPrecision,
     ContextEntityRecall,
     NoiseSensitivity,
 )
@@ -23,7 +24,7 @@ evaluator_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4.1-mini"))
 def run_ragas_evaluation(retriever_chain: Runnable, chain_name: str, dataset: Testset):
     metrics = [
         LLMContextRecall(),
-        FactualCorrectness(),
+        ContextPrecision(),
         ContextEntityRecall(),
         NoiseSensitivity(),
     ]
@@ -31,11 +32,20 @@ def run_ragas_evaluation(retriever_chain: Runnable, chain_name: str, dataset: Te
     rows = []
     for row in dataset:
         question = row.eval_sample.user_input
+
+        t_start = time.perf_counter()
         out = retriever_chain.invoke({"question" : question})
+        latency_ms = (time.perf_counter() - t_start) * 1000
 
         resp = out["response"]
         response_text = resp.content if hasattr(resp, "content") else resp.get("content", "")
         retrieved_contexts = [c.page_content for c in out["context"]]
+
+        # Token usage (assuming OpenAI metadata)
+        usage = getattr(resp, "response_metadata", {}).get("token_usage", {})
+        prompt_tokens = usage.get("prompt_tokens", 0)
+        completion_tokens = usage.get("completion_tokens", 0)
+        total_tokens = usage.get("total_tokens", prompt_tokens + completion_tokens)
 
         rows.append({
             "user_input" : question,
@@ -43,7 +53,16 @@ def run_ragas_evaluation(retriever_chain: Runnable, chain_name: str, dataset: Te
             "response" : response_text,
             "reference_contexts" : row.eval_sample.reference_contexts,
             "reference" : row.eval_sample.reference,
+
+            # Latency
+            "latency_ms": latency_ms,
+
+            # Token usage
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": total_tokens,
         })
+        time.sleep(5)
 
     eval_df = pd.DataFrame(rows)
     evaluation_dataset = EvaluationDataset.from_pandas(eval_df)
@@ -57,6 +76,12 @@ def run_ragas_evaluation(retriever_chain: Runnable, chain_name: str, dataset: Te
         "chain_name" : chain_name,
         "results" : result,
         "eval_df" : eval_df,
+        "summary": {
+            "avg_latency_ms": float(eval_df["latency_ms"].mean()),
+            "p95_latency_ms": float(eval_df["latency_ms"].quantile(0.95)),
+            "avg_total_tokens": float(eval_df["total_tokens"].mean()),
+            "total_tokens_sum": int(eval_df["total_tokens"].sum()),
+        }
     }
 
 
@@ -73,21 +98,23 @@ def _filter_result_metrics(result: EvaluationResult, keep_metrics: Iterable):
     return out
 
 
-def compare_ragas_results(results: Dict[str, EvaluationResult]):
+def compare_ragas_results(all_evaluation_results: List[Dict[str, EvaluationResult]]):
     """ 
     Compare RAGAS results for different retriever chains and return a table.
 
     """
     keep_metrics = [
-        "llm_context_recall",
-        "factual_correctness",
+        "context_recall",
+        "context_precision",
         "context_entity_recall",
-        "noise_sensitivity",
+        "noise_sensitivity(mode=relevant)",
     ]
     
     rows = {}
-    for chain_name, result in results.items():
-        metrics = _filter_result_metrics(result, keep_metrics)
+    for evaluation_result in all_evaluation_results:
+        chain_name = evaluation_result["chain_name"]
+        eval_result = evaluation_result["results"]
+        metrics = _filter_result_metrics(eval_result, keep_metrics)
         rows[chain_name] = metrics
 
     df = pd.DataFrame.from_dict(rows, orient="index")
