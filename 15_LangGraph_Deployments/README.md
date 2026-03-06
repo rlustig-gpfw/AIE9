@@ -70,7 +70,7 @@ What is the key architectural difference between the `simple_agent` and `agent_w
 
 ##### Answer:
 
-
+The `simple_agent` stops once the model produces a final response after no more tool calling. The `agent_with_helpfulness` add a helpfulness node after the "final response" to evaluate if the response was helpful. If not, it will route back to the agent to try again. Specifically, the helpfulness evaluation compares the initial query and last message (final response) and provides a structured output result `HelpfulnessResult`, determining the hepfulness of the response. To ensure the agent-toolcall-helpfulness loop doesn't run indefinitely, a message count guard block exists in `helpfulness_node`. This is set to a maximum of 10 messages after which a special message is returned instead: `HELPFULNESS:END`. This signals the end of the loop.
 
 #### Question 2:
 What is the role of `langgraph.json` in the LangGraph Deployments? Describe each of its key fields and how the platform uses this file to discover and serve your graphs.
