@@ -77,7 +77,12 @@ What is the role of `langgraph.json` in the LangGraph Deployments? Describe each
 
 ##### Answer:
 
-
+ `langgraph.json` is a project manifest for the LangGraph platform which it uses to discover and serve defined graphs. Some of the key fields include:
+ - version: schema version so that langgraph knows what fields to expect
+ - env: the path of the ".env" file for API keys
+ - python_version: python version the langgraph platform should use to load/run graphs
+ - graphs: (most important key) a map to the graph and the name of compiled graph object. This is how the platform knows what graphs are available and loads them by importing the modules
+ - assistants: dictionary of the graphs/agents and how those tie to the graph ID fields themselves. Includes human presentable names and descriptions as well.
 
 #### Activity #1:
 Create your own agent graph! Build a new graph in `app/graphs/` with a custom evaluation node (e.g., a vibe checker, a fact verifier, a summarizer — get creative!). Register it in `langgraph.json`, serve it with `uv run langgraph dev`
