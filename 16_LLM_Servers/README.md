@@ -83,7 +83,9 @@ What is the difference between serverless and dedicated endpoints?
 
 #### ✅ Answer:
 
-_(insert your answer here)_
+- Dedicated endpoints: These have dedicated cloud resources and are more performant and costly as you are basically renting the hardware/electricity in the cloud. Due to this, operators pay for the cost, even when the hardware is not used.
+
+- Serverless endpoints: These are on-demand cloud resources, where software resources are started on hardware as needed. This means there is more latency, as the hardware needs to be partition, the software needs to be moved/copied, and then started up. These resources are usually less costly, unless scaling becomes very large.
 
 ### ❓ Question #2:
 
@@ -91,7 +93,11 @@ Why is it important to consider token throughput and latency when choosing an LL
 
 #### ✅ Answer:
 
-_(insert your answer here)_
+Defining latency as the time to first token or completion, then latency is likely the primary constraint for user-facing applications. This component makes the application feel like it's responding and working well. This is obviously the case for chat-based applications, live translations, or some live assistant. Additionally, if the first token takes too long to appear, users may abandon the app, thinking it is not working. However, for long running or agent tasks that need to run autonomously, this may be less important (although will still require some feedback to the user).
+
+Token throughput, defined as tokens per second, is also important. Once the tokens start streaming, token throughput defines how quickly the rest of the response appears. Sometimes when I use the OpenAI's chat a lot, the response will slow down, which impacts how much I want to use it more in that moment (funny enough, from OpenAI's perspective, their rate limiting worked). Throughout is also impacted by cost as a higher throughput means higher cost and potentially scaling. Lastly, a very long response like a research report can be painfully slow to complete for low throughput, affecting users perception of the application.
+
+Overall, for user-facing applications, the right balance is determining when latency feels fast enough (instant?) while throughout feels steady (not bursty or too slow).
 
 ## Activity 1: RAGAS Evaluation with Cost Analysis
 
