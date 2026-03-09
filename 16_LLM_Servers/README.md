@@ -95,7 +95,7 @@ Why is it important to consider token throughput and latency when choosing an LL
 
 Defining latency as the time to first token or completion, then latency is likely the primary constraint for user-facing applications. This component makes the application feel like it's responding and working well. This is obviously the case for chat-based applications, live translations, or some live assistant. Additionally, if the first token takes too long to appear, users may abandon the app, thinking it is not working. However, for long running or agent tasks that need to run autonomously, this may be less important (although will still require some feedback to the user).
 
-Token throughput, defined as tokens per second, is also important. Once the tokens start streaming, token throughput defines how quickly the rest of the response appears. Sometimes when I use the OpenAI's chat a lot, the response will slow down, which impacts how much I want to use it more in that moment (funny enough, from OpenAI's perspective, their rate limiting worked). Throughout is also impacted by cost as a higher throughput means higher cost and potentially scaling. Lastly, a very long response like a research report can be painfully slow to complete for low throughput, affecting users perception of the application.
+Token throughput, defined as tokens per second, is also important. Once the tokens start streaming, token throughput defines how quickly the rest of the response appears. Sometimes when I use the OpenAI's chat a lot, the response will slow down, which impacts how much I want to use it more in that moment (funny enough, from OpenAI's perspective, their rate limiting worked). Throughput is also impacted by cost as a higher throughput means higher cost and potentially scaling. Lastly, a very long response like a research report can be painfully slow to complete for low throughput, affecting users perception of the application.
 
 Overall, for user-facing applications, the right balance is determining when latency feels fast enough (instant?) while throughout feels steady (not bursty or too slow).
 
@@ -104,6 +104,20 @@ Overall, for user-facing applications, the right balance is determining when lat
 Use RAGAS to evaluate your open-source Fireworks AI powered RAG app against an OpenAI `gpt-4.1-mini` powered equivalent. Compare retrieval quality, answer faithfulness, and end-to-end accuracy across both providers.
 
 Additionally, instrument both pipelines with **LangSmith** to capture token usage and cost per query. Use LangSmith's tracing and cost dashboards to compare the total cost of running each provider at scale. Include your evaluation results, cost breakdown, and analysis in your Loom video.
+
+### Activity 1 - Evaluation Results and Cost Breakdown
+
+| RAG Name         | Context Recall | Context Precision | Context Entity Recall | Faithfulness | Factual Correctness (F1) | Answer Relevancy |
+| ---------------- | -------------- | ----------------- | --------------------- | ------------ | ------------------------ | ---------------- |
+| gpt-4.1-mini RAG | 0.8000         | 0.6500            | 0.4107                | 1.0000       | 0.3000                   | 0.7575           |
+| Fireworks RAG    | 0.3000         | 0.2167            | 0.1500                | 1.0000       | 0.1100                   | 0.3698           |
+
+
+| RAG Name         | Mean Latency | P95 Latency | Mean Token Usage | Mean Cost |
+| ---------------- | ------------ | ----------- | ---------------- | --------- |
+| gpt-4.1-mini RAG | 3.02 s       | 8.86 s      | 3706 tokens      | $0.00176  |
+| Fireworks RAG    | 6.05 s       | 13.92 s     | 4058 tokens      | N/A       |
+
 
 ## Advanced Activity: Local Models
 
