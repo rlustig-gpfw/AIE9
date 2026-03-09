@@ -30,6 +30,18 @@ def get_chat_model(model_name: str | None = None, *, temperature: float = 0) -> 
     )
 
 
+def get_gpt_chat_model(model_name: str | None = None, *, temperature: float = 0) -> Any:
+    """Return a configured LangChain ChatOpenAI client pointed at Fireworks."""
+    name = model_name or os.environ.get(
+        "OPENAI_CHAT_MODEL", "gpt-4.1-mini"
+    )
+    return ChatOpenAI(
+        model=name,
+        temperature=temperature,
+        openai_api_key=os.environ["OPENAI_API_KEY"],
+    )
+
+
 def fix_tool_calls(response: AIMessage) -> AIMessage:
     """Fix invalid tool calls caused by models appending extra tokens like <|call|>."""
     if not response.invalid_tool_calls:

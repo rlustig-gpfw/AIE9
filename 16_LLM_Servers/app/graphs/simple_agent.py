@@ -11,14 +11,15 @@ from __future__ import annotations
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from app.models import get_chat_model, fix_tool_calls
+from app.models import get_chat_model, fix_tool_calls, get_gpt_chat_model
 from app.state import MessagesState
 from app.tools import get_tool_belt
 
 
 def _build_model_with_tools():
     """Return a chat model instance bound to the current tool belt."""
-    model = get_chat_model()
+    #model = get_chat_model()
+    model = get_gpt_chat_model()
     return model.bind_tools(get_tool_belt())
 
 

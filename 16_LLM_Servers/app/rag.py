@@ -40,7 +40,7 @@ class _RAGState(TypedDict):
     response: str
 
 
-def _build_rag_graph(data_dir: str):
+def _build_rag_graph(data_dir: str, embedding_model: OpenAIEmbeddings, generator_llm: ChatOpenAI):
     """Construct and compile a minimal RAG graph.
 
     Steps:
@@ -67,14 +67,6 @@ def _build_rag_graph(data_dir: str):
     )
     chunks = text_splitter.split_documents(documents) if documents else []
 
-    # Embeddings and vector store (in-memory Qdrant)
-    embedding_model = OpenAIEmbeddings(
-        model=os.environ.get("FIREWORKS_EMBEDDING_MODEL", "accounts/fireworks/models/qwen3-embedding-8b"),
-        openai_api_key=os.environ["FIREWORKS_API_KEY"],
-        openai_api_base="https://api.fireworks.ai/inference/v1",
-        check_embedding_ctx_length=False,
-        dimensions=4096,
-    )
     qdrant_vectorstore = QdrantVectorStore.from_documents(
         documents=chunks,
         embedding=embedding_model,
@@ -90,11 +82,6 @@ def _build_rag_graph(data_dir: str):
         "Only use the provided context to answer the query. If you do not know the answer, or it's not contained in the provided context respond with \"I don't know\""
     )
     chat_prompt = ChatPromptTemplate.from_messages([("human", human_template)])
-    generator_llm = ChatOpenAI(
-        model=os.environ.get("FIREWORKS_CHAT_MODEL", "accounts/fireworks/models/gpt-oss-20b"),
-        openai_api_key=os.environ["FIREWORKS_API_KEY"],
-        openai_api_base="https://api.fireworks.ai/inference/v1",
-    )
 
     def retrieve(state: _RAGState) -> _RAGState:
         retrieved_docs = retriever.invoke(state["question"]) if retriever else []
@@ -117,7 +104,33 @@ def _build_rag_graph(data_dir: str):
 def _get_rag_graph():
     """Return a cached compiled RAG graph built from RAG_DATA_DIR."""
     data_dir = os.environ.get("RAG_DATA_DIR", "data")
-    return _build_rag_graph(data_dir)
+
+    # Embeddings and vector store (in-memory Qdrant)
+    embedding_model = OpenAIEmbeddings(
+        model=os.environ.get("FIREWORKS_EMBEDDING_MODEL", "accounts/fireworks/models/qwen3-embedding-8b"),
+        openai_api_key=os.environ["FIREWORKS_API_KEY"],
+        openai_api_base="https://api.fireworks.ai/inference/v1",
+        # check_embedding_ctx_length=False,
+        # dimensions=4096,
+    )
+
+    generator_llm = ChatOpenAI(
+        model=os.environ.get("FIREWORKS_CHAT_MODEL", "accounts/fireworks/models/gpt-oss-20b"),
+        openai_api_key=os.environ["FIREWORKS_API_KEY"],
+        openai_api_base="https://api.fireworks.ai/inference/v1",
+    )
+
+    return _build_rag_graph(data_dir, embedding_model, generator_llm)
+
+
+def _get_gpt_rag_graph():
+    """Return a cached compiled RAG graph built from RAG_DATA_DIR."""
+    data_dir = os.environ.get("RAG_DATA_DIR", "data")
+
+    embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+    generator_llm = ChatOpenAI(model="gpt-4.1-mini")
+
+    return _build_rag_graph(data_dir, embedding_model, generator_llm)
 
 
 @tool
